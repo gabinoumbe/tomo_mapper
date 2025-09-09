@@ -18,7 +18,7 @@ public class SEMImagePlugin implements IMappingPlugin{
     private static String version;
 
     private final Logger LOGGER = LoggerFactory.getLogger(SEMImagePlugin.class);
-    private final String REPOSITORY = "https://github.com/kit-data-manager/tomo_mapper";
+    private final String REPOSITORY = "https://github.com/gabinoumbe/tomo_mapper";
     private String TAG;
     private Path dir;
 
@@ -50,7 +50,7 @@ public class SEMImagePlugin implements IMappingPlugin{
 
     @Override
     public String name() {
-        return "GenericSEMtoJSON";
+        return "SEMtoJSON";
     }
 
     @Override
