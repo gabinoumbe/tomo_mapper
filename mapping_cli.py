@@ -157,9 +157,9 @@ def run_sem_mapper(args):
             if not img_info:
                 raise MappingAbortionError("Could not retrieve image information. Aborting.")
             
-            if not OUTPUT_PATH.lower().endswith('.json'):
-                OUTPUT_PATH += '.json' # Ensure correct .json extension
-                logging.warning(f"The output path has been updated to {OUTPUT_PATH} to match the correct extension.")
+            #if not OUTPUT_PATH.lower().endswith('.json'):
+                #OUTPUT_PATH += '.json' # Ensure correct .json extension
+                #logging.warning(f"The output path has been updated to {OUTPUT_PATH} to match the correct extension.")
             
             OutputWriter_SEM.save_the_file(img_info, OUTPUT_PATH)
 

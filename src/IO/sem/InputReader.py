@@ -24,13 +24,13 @@ class InputReader:
             raise MappingAbortionError("Input file loading failed.")
         
         if is_zipfile(input_path):
-            if not output_path.lower().endswith('.zip'):
-                logging.error("The output path {} is expecting the extension '.zip' since the input is a zip file".format(output_path))
-                raise MappingAbortionError("Input file parsing aborted.")
+            #if not output_path.lower().endswith('.zip'):
+                #logging.error("The output path {} is expecting the extension '.zip' since the input is a zip file".format(output_path))
+                #raise MappingAbortionError("Input file parsing aborted.")
             self.temp_dir_path = extract_zip_file(input_path)
         else:
-            if not output_path.lower().endswith('.json'):
-                logging.warning("The output path {} is expecting the extension '.json'.".format(output_path))
+            #if not output_path.lower().endswith('.json'):
+                #logging.warning("The output path {} is expecting the extension '.json'.".format(output_path))
             self.parser_names = self.get_applicable_parsers(input_path)
 
             if not self.parser_names:
