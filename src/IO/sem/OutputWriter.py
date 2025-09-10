@@ -2,10 +2,9 @@ import os
 import json
 import logging
 import zipfile
-import mimetypes
 
 from src.IO.MappingAbortionError import MappingAbortionError
-from src.util import is_zipfile
+from src.util import is_mimetype_mismatch, get_filetype_with_magica
 
 
 class OutputWriter:
@@ -24,8 +23,9 @@ class OutputWriter:
         try:
             with open(file_path, 'w', encoding="utf-8") as json_file:
                 json.dump(mapped_metadata, json_file, indent=4, ensure_ascii=False)
-            mt, _ = mimetypes.guess_type(file_path)
-            if not mt == "application/json":
+            mt = get_filetype_with_magica(file_path)
+            logging.warning(f"output mimetype is {mt}")
+            if is_mimetype_mismatch(file_path):
                 OutputWriter.remove_file(file_path)
                 logging.warning(f"output mimetype is {mt}")
                 logging.error(f"Wrong output mimetype. Expecting an 'application/json'! Please check if the output path '{file_path}' you provide has the right extension.")
@@ -48,8 +48,9 @@ class OutputWriter:
                     except (FileNotFoundError, PermissionError, IsADirectoryError, OSError, zipfile.BadZipFile) as e:
                         logging.error(f"Adding {file_path} to zip was not successful: {e}")
                         raise MappingAbortionError(f"Failed to add {file_path} to zip.")
-            mt, _ = mimetypes.guess_type(zip_file_path)
-            if not mt == "application/zip":
+            mt = get_filetype_with_magica(zip_file_path)
+            logging.warning(f"output mimetype is {mt}")
+            if get_filetype_with_magica(zip_file_path):
                 OutputWriter.remove_file(zip_file_path)
                 logging.warning(f"output mimetype is {mt}")
                 logging.error(f"Wrong output mimetype. Expecting an 'application/zip'! Please check if the output path '{zip_file_path}' you provide has the right extension.")

@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-
+import mimetypes
 from magika import Magika
 import os
 import tempfile
@@ -155,3 +155,10 @@ def get_filetype_with_magica(filepath):
     m = Magika()
     res = m.identify_path(Path(filepath))
     return res.output.mime_type
+
+def is_mimetype_mismatch(filepath) -> bool:
+    mt_by_content = get_filetype_with_magica(filepath)
+    mt_by_extension, _  = mimetypes.guess_type(filepath)
+    if mt_by_extension and mt_by_content != mt_by_extension: # fail only if extension exists and is not matching
+        return True
+    return False
