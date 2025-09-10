@@ -27,6 +27,7 @@ class OutputWriter:
             mt, _ = mimetypes.guess_type(file_path)
             if not mt == "application/json":
                 OutputWriter.remove_file(file_path)
+                logging.warning(f"output mimetype is {mt}")
                 logging.error(f"Wrong output mimetype. Expecting an 'application/json'! Please check if the output path '{file_path}' you provide has the right extension.")
                 raise MappingAbortionError(f"'{file_path}' has a wrong mimetype. Produced output is corrupted! Please check the output path extension.")
             else:
@@ -50,6 +51,7 @@ class OutputWriter:
             mt, _ = mimetypes.guess_type(zip_file_path)
             if not mt == "application/zip":
                 OutputWriter.remove_file(zip_file_path)
+                logging.warning(f"output mimetype is {mt}")
                 logging.error(f"Wrong output mimetype. Expecting an 'application/zip'! Please check if the output path '{zip_file_path}' you provide has the right extension.")
                 raise MappingAbortionError(f"'{zip_file_path}' has a wrong mimetype. Produced output is corrupted! Please check the output path extension.")
             else:
