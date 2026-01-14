@@ -1,61 +1,15 @@
 package edu.kit.datamanager.semplugin;
 
-import edu.kit.datamanager.mappingservice.exception.PluginInitializationFailedException;
-import edu.kit.datamanager.mappingservice.plugins.*;
-import edu.kit.datamanager.mappingservice.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import edu.kit.datamanager.mappingservice.plugins.AbstractPythonMappingPlugin;
 import java.nio.file.Path;
-import java.util.Properties;
 
-public class SEMImagePlugin implements IMappingPlugin {
+public class SEMImagePlugin extends AbstractPythonMappingPlugin {
 
-    private static String version;
+   private static final String REPOSITORY = "https://github.com/kit-data-manager/tomo_mapper";
 
-    private final Logger LOGGER = LoggerFactory.getLogger(SEMImagePlugin.class);
-    private final String REPOSITORY = "https://github.com/kit-data-manager/tomo_mapper";
-    private String TAG;
-    private Path dir;
-
-    private String pluginVenv = "venv/PluginVenv";
-    private String venvInterpreter;
 
     public SEMImagePlugin() {
-        try {
-            // Get the context class loader
-            ClassLoader classLoader = this.getClass().getClassLoader();
-            // TODO: do we need to make sure that the resource path is somehow related to the current plugin to avoid loading the wrong property file in case of identical property names?
-            URL resource = classLoader.getResource("sempluginversion.properties");
-            LOGGER.info("Resource file: {}", resource);
-            if (resource != null) {
-                // Load the properties file
-                try (InputStream input = resource.openStream()) {
-                    Properties properties = new Properties();
-                    properties.load(input);
-                    version = properties.getProperty("version");
-                    TAG = version;
-                }
-            } else {
-                System.err.println("Properties file not found!");
-                version = "unavailable";
-                TAG = "unavailable";
-            }
-
-            if (System.getProperty("os.name").startsWith("Windows")) {
-                venvInterpreter = pluginVenv + "/Scripts/python.exe";
-            } else {
-                venvInterpreter = pluginVenv + "/bin/python3";
-            }
-
-        } catch (IOException e) {
-            throw new PluginInitializationFailedException("Failed to instantiate plugin class.", e);
-        }
+        super("GenericSEMtoJSON", REPOSITORY);
     }
 
     @Override
@@ -69,53 +23,26 @@ public class SEMImagePlugin implements IMappingPlugin {
     }
 
     @Override
-    public String version() {
-        return version;
+    public String[] inputTypes() {
+        return new String[]{"image/tiff"};
     }
 
     @Override
-    public String uri() {
-        return REPOSITORY;
+    public String[] outputTypes() {
+        return new String[]{"application/json"};
     }
 
     @Override
-    public MimeType[] inputTypes() {
-        return new MimeType[]{MimeTypeUtils.parseMimeType("image/tiff")}; //should currently be IMAGE/TIFF
-    }
-
-    @Override
-    public MimeType[] outputTypes() {
-        return new MimeType[]{MimeTypeUtils.APPLICATION_JSON};
-    }
-
-    @Override
-    public void setup() {
-        LOGGER.trace("Setting up mapping plugin {} {}", name(), version());
-        //TODO: test for minimal python version?      
-        try {
-            LOGGER.info("Cloning git repository {}, Tag {}", REPOSITORY, TAG);
-            dir = FileUtil.cloneGitRepository(REPOSITORY, TAG);
-            // Install Python dependencies
-            MappingPluginState venvState = PythonRunnerUtil.runPythonScript("-m", "venv", "--system-site-packages", dir + "/" + pluginVenv);
-            if (MappingPluginState.SUCCESS().getState().equals(venvState.getState())) {
-                LOGGER.info("Venv for plugin installed successfully. Installing packages.");
-                ShellRunnerUtil.run(dir + "/" + venvInterpreter, "-m", "pip", "install", "-r", dir + "/" + "requirements.dist.txt");
-            } else {
-                throw new PluginInitializationFailedException("Venv installation was not successful. Status: " + venvState.getState());
-            }
-        } catch (MappingPluginException e) {
-            throw new PluginInitializationFailedException("Unexpected error during plugin setup.", e);
-        }
-    }
-
-    @Override
-    public MappingPluginState mapFile(Path mappingFile, Path inputFile, Path outputFile) throws MappingPluginException {
-        long startTime = System.currentTimeMillis();
-        LOGGER.trace("Run SEM-Mapping-Tool on '{}' with mapping '{}' -> '{}'", mappingFile, inputFile, outputFile);
-        MappingPluginState result = ShellRunnerUtil.run(dir + "/" + venvInterpreter, dir + "/plugin_wrapper.py", "sem", "-m", mappingFile.toString(), "-i", inputFile.toString(), "-o", outputFile.toString());
-        long endTime = System.currentTimeMillis();
-        long totalTime = endTime - startTime;
-        LOGGER.info("Execution time of mapFile: {} milliseconds", totalTime);
-        return result;
+    public String[] getCommandArray(Path workingDir, Path mappingFile, Path inputFile, Path outputFile) {
+        return new String[]{
+                workingDir + "/plugin_wrapper.py",
+                "sem",
+                "-m",
+                mappingFile.toString(),
+                "-i",
+                inputFile.toString(),
+                "-o",
+                outputFile.toString()
+        };
     }
 }
