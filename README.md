@@ -91,6 +91,14 @@ Plugin and Python code base share the same semantic versioning, so the plugin ve
 (for example for testing or for working with older versions of the mapping service). To do this, on gradle build time provide the environment variable `VERSION_OVERRIDE_BY_BRANCH`.
 The variable needs to contain a branch name of this repo and branch deletion may break a plugin in use. Only use this option very carefully. Do not use this option for production. 
 
+To find out tested alignments between plugin versions and mapping-service versions check the following table:
+
+| Plugin version | mapping-service version |
+|----------------|------------------------|
+| v1.0.0, v1.1.0 | v1.0.5*), v1.1.1*)     |
+
+*) Plugin needs to be built with version override to work with the specified version of the mapping-service (see [issue 33](https://github.com/kit-data-manager/tomo_mapper/issues/33))
+
 ## Testing
 Run tests using `pytest`:
 ```
@@ -100,7 +108,7 @@ pytest
 ## Supported instruments and formats
 
 Due to the large range and variety of vendors, instruments and setups we cannot guarantee successful mapping for all cases. 
-The following list provides the minimal range of formats, that have been tested via sample data.
+The following list provides the **minimal range of formats, that have been tested via sample data**.
 
 ### Image Metadata (SEM and Tomography Mapping)
 
@@ -108,6 +116,9 @@ The following list provides the minimal range of formats, that have been tested 
   -  Carl Zeiss SEM (Zeiss instruments, tag 34118)
   -  FibicsXML (Zeiss instruments, tag 51023)
   -  FEI Helios (FEI / Thermofisher, tag 34682) 
+- text format
+  -  Tescan hdr files
+  -  JEOL txt files
 
 ### Tomography metadata
 
@@ -116,10 +127,9 @@ The following list provides the minimal range of formats, that have been tested 
   - ATLAS3D-Setup (Zeiss)
   - EMProject (Thermofisher)
   - ProjectData (Thermofisher)
-
-### Planned, currently not supported
-- Tescan png hdr files
-- JEOL bmp hdr files
+  - TomographyProject (Tescan)
+- HDR format
+  - Dataset_info (Tescan)
 
 ## Acknowlegdements
 

@@ -5,24 +5,28 @@ from src.model.SchemaConcepts.Dataset_simplified import Dataset
 from src.model.SetupMD import SetupMD
 from src.parser.SetupMD_Parser import SetupMD_Parser
 from src.parser.mapping_util import map_a_dict
-from src.resources.maps.mapping import setup_tf
+from src.resources.maps.mapping import setup_tescan
 from src.util import input_to_dict
+from src.Preprocessor import Preprocessor
 
 
-class EMProjectParser(SetupMD_Parser):
+class Dataset_infoParser(SetupMD_Parser):
 
     @staticmethod
     def supported_input_sources() -> List[str]:
-        return ['Thermofisher Helios']
+        return ['Tescan Solaris']
 
     def __init__(self):
-        self.internal_mapping = input_to_dict(setup_tf.read_text())
+        self.internal_mapping = input_to_dict(setup_tescan.read_text())
 
     def parse_setup(self, payload) -> tuple[SetupMD, dict]:
         parsed = self._read_input(payload)
-
+        #print("..............",parsed)
         mapping_dict = self.internal_mapping
         ac_md = map_a_dict(parsed, mapping_dict)
+
+        Preprocessor.normalize_all_units(ac_md)
+
         acquisition = self._create_acquisition(ac_md)
         datasets = self._create_datasets(ac_md)
         if not datasets:
@@ -62,7 +66,4 @@ class EMProjectParser(SetupMD_Parser):
 
     @staticmethod
     def expected_input_format():
-        return "text/xml"
-
-
-
+        return "text/plain"

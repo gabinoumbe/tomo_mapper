@@ -24,7 +24,7 @@ public class SEMImagePlugin extends AbstractPythonMappingPlugin {
 
     @Override
     public String[] inputTypes() {
-        return new String[]{"image/tiff"};
+        return new String[]{"image/tiff", "text/plain"};
     }
 
     @Override
